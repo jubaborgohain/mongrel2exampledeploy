@@ -1,0 +1,23 @@
+#!/bin/sh
+
+DEPLOYLOC=~/Code/mongrel2deploy
+MONGREL2LOC=~/Code/mongrel2
+
+cd $MONGREL2LOC/examples/chat
+python www.py
+
+cd $DEPLOYLOC
+
+# run the demos
+./profiles/chat/run
+./profiles/handlertest/run
+./profiles/mp3stream/run
+./profiles/web/run
+
+
+# run procer
+# clear out the error.log for testing
+rm profiles/error.log
+  
+# start procer
+sudo procer $PWD/profiles $PWD/procer.pid

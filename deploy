@@ -1,0 +1,83 @@
+#!/bin/bash
+
+CONFFILE=mongrel2ubuntu.conf
+DEPLOYLOC=~/Code/mongrel2deploy
+MONGREL2LOC=~/Code/mongrel2
+
+# create the deployment dir
+mkdir $DEPLOYLOC
+
+# copy the mongrel2.conf sample from the source to here
+cp mongrel2ubuntu.conf $DEPLOYLOC/mongrel2.conf
+
+cd $DEPLOYLOC
+  
+# fill it with the directories we need
+mkdir run tmp logs static profiles
+  
+# create the procer profile dirs for each thing
+cd profiles/
+mkdir chat mp3stream handlertest web mongrel2
+cd ..
+
+# load up the mongrel2.conf file
+m2sh load -db config.sqlite -config mongrel2.conf  
+
+# setting up procer
+cd profiles/
+  
+# make all the restart settings
+for i in *; do touch $i/restart; done
+  
+# make all the empty dependencies
+for i in *; do touch $i/depends; done
+  
+# setup the pid_files to some sort of default
+for i in *; do echo $PWD/$i/$i.pid > $i/pid_file; done
+cat chat/pid_file
+  
+# get the run script setup to do nothing
+for i in *; do echo '#!/bin/sh' > $i/run; done
+for i in *; do chmod u+x $i/run; done
+
+# get mongrel2 running inside of procer
+cd $DEPLOYLOC
+# make mongrel2 run as root
+# sudo chown root.root profiles/mongrel2
+  
+# tell procer where mongrel2 puts its pid_file
+# notice the > not >> on this
+echo "$PWD/run/mongrel2.pid" > profiles/mongrel2/pid_file
+  
+# make the run script start mongrel2 (notice the >> on this)
+echo "cd $PWD" >> profiles/mongrel2/run
+echo "m2sh start -db config.sqlite -host localhost" >> profiles/mongrel2/run
+
+# build the python examples
+cd $MONGREL2LOC/examples/python
+sudo python setup.py install
+
+# setup the example run scripts
+cd $DEPLOYLOC/profiles/chat/
+echo "set -e" >> run
+echo "cd "$MONGREL2LOC"/examples/chat" >> run
+echo "nohup python -u chat.py 2>&1 > chat.log &" >> run
+echo "echo $! > "$DEPLOYLOC"/profiles/chat/chat.pid" >> run
+
+cd $DEPLOYLOC/profiles/handlertest/
+echo "set -e" >> run
+echo "cd "$MONGREL2LOC"/examples/http_0mq" >> run
+echo "nohup python -u http.py 2>&1 > http.log &" >> run
+echo "echo $! > "$DEPLOYLOC"/profiles/handlertest/handlertest.pid" >> run
+
+cd $DEPLOYLOC/profiles/mp3stream/
+echo "set -e" >> run
+echo "cd "$MONGREL2LOC"/examples/mp3stream" >> run
+echo "nohup python -u handler.py 2>&1 > mp3stream.log &" >> run
+echo "echo $! > "$DEPLOYLOC"/profiles/mp3stream/mp3stream.pid" >> run
+
+cd $DEPLOYLOC/profiles/web/
+echo "set -e" >> run
+echo "cd "$MONGREL2LOC"/examples/chat" >> run
+echo "nohup python -u www.py 2>&1 > www.log &" >> run
+echo "echo $! > "$DEPLOYLOC"/profiles/web/web.pid" >> run
