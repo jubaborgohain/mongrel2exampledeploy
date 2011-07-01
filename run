@@ -3,8 +3,6 @@
 DEPLOYLOC=~/Code/mongrel2deploy
 MONGREL2LOC=~/Code/mongrel2
 
-cd $MONGREL2LOC/examples/chat
-python www.py
 
 cd $DEPLOYLOC
 
@@ -21,3 +19,6 @@ rm profiles/error.log
   
 # start procer
 sudo procer $PWD/profiles $PWD/procer.pid
+
+cd $MONGREL2LOC/examples/chat
+python www.py
