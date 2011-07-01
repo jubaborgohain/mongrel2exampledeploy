@@ -1,0 +1,13 @@
+Intro:
+------
+Creates a deploy directory as outlined in the mongrel2 manual. Mainly used to quickly setup some test servers. More or less follows the Deploying section of the mongrel2 manual: http://mongrel2.org/static/mongrel2-manual.html#x1-410004
+
+How to use:
+-----------
+1. Download the files.
+2. Edit deploy and run if you do not want to deploy in ~/Code
+3. Open up a terminal and run chmod u+x deploy
+4. Open up a terminal and run chmod u+x run
+5. ./deploy
+6. ./run
+
